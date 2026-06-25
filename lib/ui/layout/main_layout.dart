@@ -99,7 +99,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                                   height: 12,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: isConnected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+                                    color: isConnected ? Colors.green : Theme.of(context).colorScheme.error,
                                   ),
                                 ),
                                 const SizedBox(width: 8),

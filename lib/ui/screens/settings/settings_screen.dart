@@ -245,7 +245,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   _salonNameController.text = settings.nomSalon;
                                 });
                               },
-                              child: Text('Annuler'),
+                              style: ButtonStyle(
+                                foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                  if (states.contains(WidgetState.hovered)) return Colors.red;
+                                  return Colors.white;
+                                }),
+                                overlayColor: WidgetStateProperty.all(Colors.red.withOpacity(0.08)),
+                              ),
+                              child: const Text('Annuler'),
                             ),
                           ],
                         ),
@@ -321,6 +328,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       _newPasswordController.clear();
                                     });
                                   },
+                                  style: ButtonStyle(
+                                    foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                      if (states.contains(WidgetState.hovered)) return Colors.red;
+                                      return Colors.white;
+                                    }),
+                                    overlayColor: WidgetStateProperty.all(Colors.red.withOpacity(0.08)),
+                                  ),
                                   child: const Text('Annuler'),
                                 ),
                                 const SizedBox(width: 16),

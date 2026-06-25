@@ -216,7 +216,17 @@ class _AddCoiffeurDialogState extends ConsumerState<AddCoiffeurDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.hovered)) return Colors.red;
+                return Colors.white;
+              }),
+              overlayColor: WidgetStateProperty.all(Colors.red.withOpacity(0.08)),
+            ),
+            child: const Text('Annuler'),
+          ),
         ElevatedButton(
           onPressed: () {
             if (nomController.text.isNotEmpty && prenomController.text.isNotEmpty) {
@@ -350,7 +360,17 @@ class _EditCoiffeurDialogState extends ConsumerState<EditCoiffeurDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.hovered)) return Colors.red;
+                return Colors.white;
+              }),
+              overlayColor: WidgetStateProperty.all(Colors.red.withOpacity(0.08)),
+            ),
+            child: const Text('Annuler'),
+          ),
         ElevatedButton(
           onPressed: () {
             if (nomController.text.isNotEmpty && prenomController.text.isNotEmpty) {

@@ -85,6 +85,11 @@ class AppTheme {
         bodyLarge: TextStyle(color: textPrimaryColor),
         bodyMedium: TextStyle(color: textSecondaryColor),
       ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: Colors.white,
+        selectionColor: Color(0x555E54A4),
+        selectionHandleColor: Colors.white,
+      ),
     );
   }
 
@@ -164,6 +169,11 @@ class AppTheme {
         titleLarge: TextStyle(color: lightTextPrimaryColor, fontWeight: FontWeight.w600),
         bodyLarge: TextStyle(color: lightTextPrimaryColor),
         bodyMedium: TextStyle(color: lightTextSecondaryColor),
+      ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: Colors.black87,
+        selectionColor: Color(0x335E54A4),
+        selectionHandleColor: Colors.black87,
       ),
     );
   }

@@ -379,6 +379,13 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.hovered)) return Colors.red;
+                return Colors.white;
+              }),
+              overlayColor: WidgetStateProperty.all(Colors.red.withOpacity(0.08)),
+            ),
             child: const Text('Annuler'),
           ),
           ElevatedButton(
@@ -440,6 +447,13 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.hovered)) return Colors.red;
+                return Colors.white;
+              }),
+              overlayColor: WidgetStateProperty.all(Colors.red.withOpacity(0.08)),
+            ),
             child: const Text('Annuler'),
           ),
           ElevatedButton(
