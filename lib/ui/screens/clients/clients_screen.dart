@@ -6,6 +6,7 @@ import '../../../providers/visites_provider.dart';
 import '../../../providers/color_provider.dart';
 import '../../../data/database.dart';
 import 'package:drift/drift.dart' hide Column;
+import '../../../utils/text_utils.dart';
 
 class ClientsScreen extends ConsumerStatefulWidget {
   const ClientsScreen({super.key});
@@ -398,8 +399,8 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
               if (nomController.text.isNotEmpty &&
                   prenomController.text.isNotEmpty) {
                 ref.read(clientsProvider.notifier).addClient(
-                      nomController.text,
-                      prenomController.text,
+                      toTitleCase(nomController.text),
+                      toTitleCase(prenomController.text),
                       telController.text,
                       notesController.text,
                     );
@@ -465,8 +466,8 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
             onPressed: () {
               if (nomController.text.isNotEmpty && prenomController.text.isNotEmpty) {
                 final updated = client.copyWith(
-                  nom: nomController.text,
-                  prenom: prenomController.text,
+                  nom: toTitleCase(nomController.text),
+                  prenom: toTitleCase(prenomController.text),
                   telephone: telController.text.isEmpty ? const Value(null) : Value(telController.text),
                 );
                 ref.read(clientsProvider.notifier).updateClient(updated);

@@ -13,6 +13,7 @@ Voir RESUME_PROJET.md pour l'architecture complète.
 - schemaVersion actuelle = 4 (ne pas modifier sans migration)
 - Toujours exécuter build_runner après modif Drift
 - Supabase ne doit jamais bloquer l'UI
+- Toujours utiliser toTitleCase() (depuis text_utils.dart) pour les champs nom/prenom/specialite avant enregistrement en base.
 
 ## HISTORIQUE DES MODIFICATIONS
 
@@ -26,3 +27,8 @@ Migration Drift v4 avec table Parametres.
 Couleur des boutons personnalisable via color_provider.dart.
 Thème clair/sombre fonctionnel sur tous les onglets.
 Synchronisation Supabase implémentée dans sync_service.dart.
+
+### [SUITE] — Normalisation de la casse
+Création de `lib/utils/text_utils.dart` avec `toTitleCase` et `toSentenceCase`.
+Application de `toTitleCase` dans `clients_screen.dart` et `coiffeurs_screen.dart` avant l'enregistrement.
+Application de `toSentenceCase` pour les notes dans `payment_screen.dart`.

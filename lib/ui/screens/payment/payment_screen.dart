@@ -7,6 +7,7 @@ import '../../../providers/visites_provider.dart';
 import '../../../data/database.dart';
 import '../../../services/pdf_service.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/text_utils.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({super.key});
@@ -667,7 +668,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       typeCoupe: _typeCoupe,
       montant: _montantActuel,
       estGratuite: _useGratuite,
-      note: _noteController.text,
+      note: toSentenceCase(_noteController.text),
       dateVisite: _selectedDate,
     );
 
@@ -679,7 +680,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       typeCoupe: _typeCoupe,
       montant: _montantActuel,
       estGratuite: _useGratuite,
-      note: _noteController.text,
+      note: toSentenceCase(_noteController.text),
     );
 
     final settings = ref.read(settingsProvider).value;

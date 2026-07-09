@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../providers/coiffeurs_provider.dart';
 import '../../../data/database.dart';
 import 'package:drift/drift.dart' hide Column;
+import '../../../utils/text_utils.dart';
 
 class CoiffeursScreen extends ConsumerWidget {
   const CoiffeursScreen({super.key});
@@ -231,12 +232,12 @@ class _AddCoiffeurDialogState extends ConsumerState<AddCoiffeurDialog> {
           onPressed: () {
             if (nomController.text.isNotEmpty && prenomController.text.isNotEmpty) {
               ref.read(coiffeursProvider.notifier).addCoiffeur(
-                nom: nomController.text,
-                prenom: prenomController.text,
-                specialite: specialiteController.text,
+                nom: toTitleCase(nomController.text),
+                prenom: toTitleCase(prenomController.text),
+                specialite: toTitleCase(specialiteController.text),
                 photoPath: photoPath,
-                nationalite: nationaliteController.text,
-                lieuNaissance: lieuNaissanceController.text,
+                nationalite: toTitleCase(nationaliteController.text),
+                lieuNaissance: toTitleCase(lieuNaissanceController.text),
                 dateNaissance: dateNaissance,
                 adresse: adresseController.text,
               );
@@ -375,12 +376,12 @@ class _EditCoiffeurDialogState extends ConsumerState<EditCoiffeurDialog> {
           onPressed: () {
             if (nomController.text.isNotEmpty && prenomController.text.isNotEmpty) {
               final updated = widget.coiffeur.copyWith(
-                nom: nomController.text,
-                prenom: prenomController.text,
-                specialite: specialiteController.text.isEmpty ? const Value(null) : Value(specialiteController.text),
+                nom: toTitleCase(nomController.text),
+                prenom: toTitleCase(prenomController.text),
+                specialite: specialiteController.text.isEmpty ? const Value(null) : Value(toTitleCase(specialiteController.text)),
                 photoPath: photoPath == null ? const Value(null) : Value(photoPath),
-                nationalite: nationaliteController.text.isEmpty ? const Value(null) : Value(nationaliteController.text),
-                lieuNaissance: lieuNaissanceController.text.isEmpty ? const Value(null) : Value(lieuNaissanceController.text),
+                nationalite: nationaliteController.text.isEmpty ? const Value(null) : Value(toTitleCase(nationaliteController.text)),
+                lieuNaissance: lieuNaissanceController.text.isEmpty ? const Value(null) : Value(toTitleCase(lieuNaissanceController.text)),
                 dateNaissance: dateNaissance == null ? const Value(null) : Value(dateNaissance),
                 adresse: adresseController.text.isEmpty ? const Value(null) : Value(adresseController.text),
               );
