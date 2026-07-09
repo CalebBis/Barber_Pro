@@ -1,0 +1,186 @@
+# RÈGLES OBLIGATOIRES POUR TOUT AGENT IA — BENJI COIFFURE
+
+## ⚠️ LIS CE FICHIER EN ENTIER AVANT DE TOUCHER AU CODE ⚠️
+
+---
+
+## ÉTAPE 0 — OBLIGATOIRE AVANT TOUTE ACTION
+
+Avant d'écrire ou de modifier la moindre ligne de code,
+tu dois obligatoirement faire ces 3 choses dans l'ordre :
+
+1. Lire le fichier RESUME_PROJET.md (architecture complète)
+2. Lire le fichier instruction.md (historique de toutes 
+   les modifications déjà effectuées)
+3. Faire un résumé de ce que tu as compris avant d'agir,
+   et attendre la confirmation de l'utilisateur
+
+Si tu ne fais pas ces 3 étapes, tu risques de casser 
+des fonctionnalités déjà implémentées.
+
+---
+
+## ÉTAPE 1 — RÈGLES TECHNIQUES ABSOLUES (ne jamais violer)
+
+### Base de données
+- Ne JAMAIS modifier les tables Drift existantes sans créer 
+  une migration SQLite (incrémenter schemaVersion dans database.dart)
+- Après toute modification de table Drift, toujours exécuter :
+  dart run build_runner build --delete-conflicting-outputs
+- Les tables existantes sont : clients, coiffeurs, visites, parametres
+- Ne jamais supprimer ou renommer une colonne existante
+
+### Mode hors-ligne
+- Le logiciel doit fonctionner à 100% sans internet
+- SQLite est la source de vérité principale
+- Supabase est secondaire (synchronisation en arrière-plan)
+- Tous les appels Supabase doivent être dans des try/catch
+- Ne jamais bloquer l'UI si Supabase est inaccessible
+
+### Thème et couleurs
+- Ne JAMAIS utiliser de couleurs hardcodées dans les écrans
+- Toujours utiliser :
+  * Theme.of(context).scaffoldBackgroundColor
+  * Theme.of(context).colorScheme.surface
+  * Theme.of(context).colorScheme.onSurface
+  * Theme.of(context).textTheme.*
+- La couleur des boutons se lit via :
+  ref.watch(buttonColorProvider) 
+  depuis lib/providers/color_provider.dart
+  ET Theme.of(context).colorScheme.tertiary dans les widgets
+- Ne jamais recoder la couleur des boutons en dur
+
+### Drift et copyWith
+- Pour mettre à jour un champ nullable avec copyWith,
+  toujours utiliser Value<T> :
+  * Pour une valeur : Value(maValeur)
+  * Pour forcer null : const Value(null)
+- Toujours importer dans les fichiers concernés :
+  import 'package:drift/drift.dart' hide Column;
+
+### Architecture
+- Ne pas créer de nouveaux providers si un provider 
+  existant peut être réutilisé ou étendu
+- Ne pas dupliquer la logique métier déjà présente 
+  dans les providers existants
+- Respecter la structure de dossiers existante :
+  lib/data/ → tables et base de données
+  lib/providers/ → state management Riverpod
+  lib/services/ → logique métier (pdf, sync, etc.)
+  lib/ui/screens/ → écrans par fonctionnalité
+  lib/ui/layout/ → navigation principale
+  lib/theme/ → thème global
+
+---
+
+## ÉTAPE 2 — RÈGLES DE QUALITÉ
+
+- Maintenir l'esthétique "Premium" : cartes arrondies,
+  micro-animations, icônes cohérentes
+- Ne pas introduire de design plat ou de couleurs criardes
+- Chaque nouvel écran doit supporter le thème clair ET sombre
+- Les montants sont toujours en Francs Congolais (FC)
+  Format : "9 000 FC" avec espace comme séparateur
+- Les dates sont toujours en français
+
+---
+
+## ÉTAPE 3 — RÈGLE DE MODIFICATION DU FICHIER instruction.md
+
+Après CHAQUE modification du code, tu dois obligatoirement
+mettre à jour le fichier instruction.md en ajoutant 
+une entrée dans la section "HISTORIQUE DES MODIFICATIONS"
+avec ce format exact :
+
+---
+### [DATE] — [NOM DE LA TÂCHE]
+
+**Fichiers modifiés :**
+- lib/chemin/vers/fichier1.dart
+- lib/chemin/vers/fichier2.dart
+
+**Ce qui a été fait :**
+Description claire et précise de la modification.
+
+**Ce qui a changé dans l'architecture :**
+Si une nouvelle règle, provider, service ou table 
+a été ajouté, le décrire ici pour les agents suivants.
+
+**Points d'attention pour l'agent suivant :**
+Signaler tout ce qui pourrait être fragile ou 
+nécessiter une attention particulière.
+---
+
+Cette mise à jour de instruction.md est OBLIGATOIRE.
+Ne termine pas ta tâche sans l'avoir faite.
+
+---
+
+## ÉTAPE 4 — CE QU'IL NE FAUT JAMAIS FAIRE
+
+- Ne jamais réécrire un fichier entier si seule 
+  une partie doit changer
+- Ne jamais supprimer du code existant sans être 
+  certain qu'il est inutilisé
+- Ne jamais ignorer une erreur en la commentant
+- Ne jamais créer un fichier qui existe déjà 
+  (toujours vérifier avant de créer)
+- Ne jamais modifier RESUME_PROJET.md directement :
+  ce fichier est mis à jour uniquement par l'utilisateur
+- Ne jamais exposer ou logger les clés Supabase
+
+---
+
+## RAPPEL DE L'ARCHITECTURE ACTUELLE
+
+Stack : Flutter Desktop Windows + Drift (SQLite) 
+        + Supabase + Riverpod + fl_chart + pdf/printing
+
+6 onglets : Dashboard / Paiement / Clients / 
+            Coiffeurs / Inventaire / Paramètres
+
+Fichiers clés :
+- lib/data/database.dart → base de données Drift
+- lib/data/tables.dart → définition des 4 tables
+- lib/theme/app_theme.dart → thème global (clair/sombre)
+- lib/providers/color_provider.dart → couleur des boutons
+- lib/providers/settings_provider.dart → paramètres salon
+- lib/services/sync_service.dart → sync vers Supabase
+- lib/services/pdf_service.dart → génération des PDFs
+- lib/ui/layout/main_layout.dart → navigation principale
+
+Schéma de la base : schemaVersion actuelle = 4
+Migrations effectuées :
+  v1 → v2 : (initial)
+  v2 → v3 : ajout adresse aux coiffeurs
+  v3 → v4 : ajout table Parametres
+
+---
+
+## FORMAT DU FICHIER instruction.md
+
+Le fichier instruction.md doit toujours respecter 
+cette structure :
+
+# INSTRUCTION.MD — BENJI COIFFURE
+
+## PRÉSENTATION DU PROJET
+(résumé court du projet — ne pas modifier)
+
+## RÈGLES ACTIVES
+(liste des règles techniques — mise à jour si nouvelle règle)
+
+## HISTORIQUE DES MODIFICATIONS
+(entrées ajoutées par chaque agent IA dans l'ordre chronologique)
+
+---
+
+## MOT FINAL
+
+Tu es responsable de laisser le projet dans un état 
+MEILLEUR qu'à ton arrivée.
+Un autre agent IA reprendra après toi.
+Ce que tu documentes dans instruction.md est 
+ce qui lui permettra de travailler efficacement.
+Travaille avec précision, lis avant d'agir, 
+documente après avoir agi.

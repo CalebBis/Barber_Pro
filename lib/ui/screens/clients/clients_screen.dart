@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../providers/clients_provider.dart';
 import '../../../providers/visites_provider.dart';
+import '../../../providers/color_provider.dart';
 import '../../../data/database.dart';
 import 'package:drift/drift.dart' hide Column;
 
@@ -103,7 +104,11 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                              color: Theme.of(context).primaryColor,
+                              color: ref.watch(buttonColorProvider).maybeWhen(
+                                data: (c) => c,
+                                orElse: () => Theme.of(context).colorScheme.tertiary,
+                              ),
+                              width: 2,
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),

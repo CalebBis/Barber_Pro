@@ -23,6 +23,20 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _noteController = TextEditingController();
 
+  // Contrôleurs pour la barre de recherche client
+  final TextEditingController _clientSearchController = TextEditingController();
+  final FocusNode _clientFocusNode = FocusNode();
+  bool _showClientSuggestions = false;
+  String _clientQuery = '';
+
+  @override
+  void dispose() {
+    _clientSearchController.dispose();
+    _clientFocusNode.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
   final int prixClassique = 9000;
   final int prixPremium = 12000;
 
@@ -94,44 +108,184 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                     clientsAsync.when(
                       loading: () => const CircularProgressIndicator(),
                       error: (e, s) => Text('Erreur: $e'),
-                      data: (clients) => DropdownButtonFormField<int>(
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Theme.of(context).scaffoldBackgroundColor,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Theme.of(context).dividerColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Theme.of(context).dividerColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.tertiary),
-                          ),
-                        ),
-                        dropdownColor: Theme.of(context).colorScheme.surface,
-                        icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54)),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        value: _selectedClientId,
-                        items: clients.map((c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text('${c.prenom} ${c.nom}'),
-                        )).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedClientId = val;
-                            if (val != null) {
-                              final client = clients.firstWhere((c) => c.id == val);
-                              if (client.gratuitesDisponibles == 0) {
-                                _useGratuite = false;
-                              }
-                            }
-                          });
-                        },
-                      ),
+                      data: (clients) {
+                        final filtered = clients.where((c) {
+                          final q = _clientQuery.toLowerCase();
+                          return q.isEmpty ||
+                              c.prenom.toLowerCase().contains(q) ||
+                              c.nom.toLowerCase().contains(q) ||
+                              (c.telephone ?? '').contains(q);
+                        }).toList();
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: _clientSearchController,
+                              focusNode: _clientFocusNode,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              decoration: InputDecoration(
+                                hintText: 'Rechercher par nom, prénom ou téléphone...',
+                                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38)),
+                                prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54)),
+                                suffixIcon: _clientSearchController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54)),
+                                        onPressed: () {
+                                          setState(() {
+                                            _clientSearchController.clear();
+                                            _clientQuery = '';
+                                            _selectedClientId = null;
+                                            _showClientSuggestions = false;
+                                            _useGratuite = false;
+                                          });
+                                        },
+                                      )
+                                    : null,
+                                filled: true,
+                                fillColor: Theme.of(context).scaffoldBackgroundColor,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.tertiary, width: 2),
+                                ),
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  _clientQuery = val;
+                                  _showClientSuggestions = val.isNotEmpty;
+                                  if (val.isEmpty) _selectedClientId = null;
+                                });
+                              },
+                              onTap: () {
+                                setState(() {
+                                  _showClientSuggestions = _clientSearchController.text.isNotEmpty;
+                                });
+                              },
+                            ),
+                            if (_showClientSuggestions && filtered.isNotEmpty)
+                              Container(
+                                margin: const EdgeInsets.only(top: 4),
+                                constraints: const BoxConstraints(maxHeight: 220),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.25),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  padding: EdgeInsets.zero,
+                                  itemCount: filtered.length,
+                                  itemBuilder: (ctx, i) {
+                                    final c = filtered[i];
+                                    final isSelected = c.id == _selectedClientId;
+                                    return InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedClientId = c.id;
+                                          _clientSearchController.text = '${c.prenom} ${c.nom}';
+                                          _clientQuery = '';
+                                          _showClientSuggestions = false;
+                                          if (c.gratuitesDisponibles == 0) _useGratuite = false;
+                                        });
+                                        _clientFocusNode.unfocus();
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Theme.of(context).colorScheme.tertiary.withOpacity(0.15)
+                                              : Colors.transparent,
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 16,
+                                              backgroundColor: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
+                                              child: Text(
+                                                c.prenom.isNotEmpty ? c.prenom[0].toUpperCase() : '?',
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.tertiary,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    '${c.prenom} ${c.nom}',
+                                                    style: TextStyle(
+                                                      color: Theme.of(context).colorScheme.onSurface,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  if (c.telephone != null && c.telephone!.isNotEmpty)
+                                                    Text(
+                                                      c.telephone!,
+                                                      style: TextStyle(
+                                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                            if (isSelected)
+                                              Icon(Icons.check_circle, color: Theme.of(context).colorScheme.tertiary, size: 18),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            else if (_showClientSuggestions && filtered.isEmpty)
+                              Container(
+                                margin: const EdgeInsets.only(top: 4),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Theme.of(context).dividerColor),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.search_off, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38), size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Aucun client trouvé',
+                                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                     SizedBox(height: 16),
 
@@ -322,6 +476,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12)),
                                     ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: Theme.of(context).colorScheme.tertiary),
+                                    ),
                                   ),
                                   dropdownColor: Theme.of(context).colorScheme.surfaceContainer,
                                   icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54)),
@@ -377,7 +535,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                           onChanged: (val) => setState(() => _useGratuite = val ?? false),
                           title: Text(
                             'Utiliser une coupe gratuite (solde : ${selectedClient.gratuitesDisponibles})',
-                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           checkColor: Theme.of(context).colorScheme.onSurface,
