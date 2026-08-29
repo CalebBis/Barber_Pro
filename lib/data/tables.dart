@@ -43,3 +43,15 @@ class Parametres extends Table {
   TextColumn get nomSalon => text().withDefault(const Constant('Benji Coiffure'))();
   BoolColumn get themeClair => boolean().withDefault(const Constant(false))();
 }
+
+class RendezVous extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get clientId => integer().references(Clients, #id)();
+  IntColumn get coiffeurId => integer().references(Coiffeurs, #id)();
+  DateTimeColumn get dateRdv => dateTime()();
+  TextColumn get typeCoupe => text()(); // "classique" ou "premium"
+  TextColumn get statut => text().withDefault(const Constant('en_attente'))();
+  // valeurs possibles : "en_attente", "honore", "annule"
+  TextColumn get note => text().nullable()();
+  DateTimeColumn get dateCreation => dateTime().withDefault(currentDateAndTime)();
+}

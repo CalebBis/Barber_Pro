@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'config/supabase_config.dart';
 import 'theme/app_theme.dart';
 import 'ui/layout/main_layout.dart';
@@ -34,6 +35,9 @@ void main() async {
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
   );
+
+  // Initialiser les données de locale pour intl (DateFormat fr_FR, etc.)
+  await initializeDateFormatting('fr_FR', null);
 
   runApp(const ProviderScope(child: MyApp()));
 }

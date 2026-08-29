@@ -6,10 +6,12 @@ import '../screens/payment/payment_screen.dart';
 import '../screens/clients/clients_screen.dart';
 import '../screens/coiffeurs/coiffeurs_screen.dart';
 import '../screens/inventory/inventory_screen.dart';
+import '../screens/rendez_vous/rendez_vous_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../screens/settings/settings_screen.dart';
-import '../../services/sync_service.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/rendez_vous_provider.dart';
+import '../../providers/connexion_provider.dart';
 
 class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({super.key});
@@ -24,6 +26,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     PaymentScreen(),
+    RendezVousScreen(),
     ClientsScreen(),
     CoiffeursScreen(),
     InventoryScreen(),
@@ -33,6 +36,13 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(settingsProvider);
+    final rdvBadgeAsync = ref.watch(rdvAujourdhuilProvider);
+    final rdvBadgeCount = rdvBadgeAsync.value ?? 0;
+    final connexionAsync = ref.watch(connexionSupabaseProvider);
+    final estConnecte = connexionAsync.maybeWhen(
+      data: (v) => v,
+      orElse: () => false,
+    );
     final nomSalon = settingsAsync.maybeWhen(
       data: (s) => s.nomSalon,
       orElse: () => 'Benji Coiffure',
@@ -42,12 +52,14 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       orElse: () => false,
     );
     final unselectedColor = themeClair ? Theme.of(context).colorScheme.onSurface.withOpacity(0.54) : Theme.of(context).colorScheme.onSurface.withOpacity(0.54);
+    // Updated: Settings is now index 6
+    const int settingsIndex = 6;
     return Scaffold(
       body: Row(
         children: [
           // Sidebar
           NavigationRail(
-            selectedIndex: _selectedIndex < 5 ? _selectedIndex : null,
+            selectedIndex: _selectedIndex < settingsIndex ? _selectedIndex : null,
             onDestinationSelected: (int index) {
               setState(() {
                 _selectedIndex = index;
@@ -87,35 +99,31 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        FutureBuilder<bool>(
-                          future: SyncService.isConnected(),
-                          builder: (context, snapshot) {
-                            final isConnected = snapshot.data ?? false;
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: isConnected ? Colors.green : Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  isConnected ? 'En ligne' : 'Hors ligne',
-                                  style: TextStyle(color: unselectedColor),
-                                ),
-                              ],
-                            );
-                          },
+                        // Indicateur connexion Supabase (StreamProvider — rafraîchi toutes les 10s)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 10,
+                              color: estConnecte
+                                  ? const Color(0xFF1D9E75)
+                                  : Colors.red,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              estConnecte ? 'En ligne' : 'Hors ligne',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: unselectedColor,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         InkWell(
                           onTap: () {
                             setState(() {
-                              _selectedIndex = 5; // Index de SettingsScreen
+                              _selectedIndex = settingsIndex;
                             });
                           },
                           child: Row(
@@ -123,14 +131,14 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                             children: [
                               Icon(
                                 Icons.settings,
-                                color: _selectedIndex == 5 ? Theme.of(context).primaryColor : unselectedColor,
+                                color: _selectedIndex == settingsIndex ? Theme.of(context).primaryColor : unselectedColor,
                               ),
                               SizedBox(width: 8),
                               Text(
                                 'Paramètres',
                                 style: TextStyle(
-                                  color: _selectedIndex == 5 ? Theme.of(context).primaryColor : unselectedColor,
-                                  fontWeight: _selectedIndex == 5 ? FontWeight.bold : FontWeight.normal,
+                                  color: _selectedIndex == settingsIndex ? Theme.of(context).primaryColor : unselectedColor,
+                                  fontWeight: _selectedIndex == settingsIndex ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                             ],
@@ -141,28 +149,47 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                 ),
               ),
             ),
-            destinations: const [
-              NavigationRailDestination(
+            destinations: [
+              const NavigationRailDestination(
                 icon: Icon(Icons.dashboard_outlined),
                 selectedIcon: Icon(Icons.dashboard),
                 label: Text('Dashboard'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.payment_outlined),
                 selectedIcon: Icon(Icons.payment),
                 label: Text('Paiement'),
               ),
               NavigationRailDestination(
+                icon: rdvBadgeCount > 0
+                    ? Badge(
+                        label: Text('$rdvBadgeCount'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        textColor: Theme.of(context).colorScheme.onError,
+                        child: const Icon(Icons.calendar_month_outlined),
+                      )
+                    : const Icon(Icons.calendar_month_outlined),
+                selectedIcon: rdvBadgeCount > 0
+                    ? Badge(
+                        label: Text('$rdvBadgeCount'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        textColor: Theme.of(context).colorScheme.onError,
+                        child: const Icon(Icons.calendar_month),
+                      )
+                    : const Icon(Icons.calendar_month),
+                label: const Text('Rendez-vous'),
+              ),
+              const NavigationRailDestination(
                 icon: Icon(Icons.people_outline),
                 selectedIcon: Icon(Icons.people),
                 label: Text('Clients'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.content_cut_outlined),
                 selectedIcon: Icon(Icons.content_cut),
                 label: Text('Coiffeurs'),
               ),
-              NavigationRailDestination(
+              const NavigationRailDestination(
                 icon: Icon(Icons.inventory_2_outlined),
                 selectedIcon: Icon(Icons.inventory_2),
                 label: Text('Inventaire'),

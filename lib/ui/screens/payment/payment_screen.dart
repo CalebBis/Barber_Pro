@@ -8,6 +8,9 @@ import '../../../data/database.dart';
 import '../../../services/pdf_service.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../utils/text_utils.dart';
+import '../../../providers/database_provider.dart';
+import '../../../providers/rendez_vous_provider.dart';
+import '../../../services/sync_service.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({super.key});
@@ -29,6 +32,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   final FocusNode _clientFocusNode = FocusNode();
   bool _showClientSuggestions = false;
   String _clientQuery = '';
+
+  // RDV linking
+  List<RendezVousData> _rdvEnAttente = [];
+  int? _selectedRdvId;
 
   @override
   void dispose() {
@@ -196,15 +203,20 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                                     final c = filtered[i];
                                     final isSelected = c.id == _selectedClientId;
                                     return InkWell(
-                                      onTap: () {
+                                      onTap: () async {
                                         setState(() {
                                           _selectedClientId = c.id;
                                           _clientSearchController.text = '${c.prenom} ${c.nom}';
                                           _clientQuery = '';
                                           _showClientSuggestions = false;
                                           if (c.gratuitesDisponibles == 0) _useGratuite = false;
+                                          _selectedRdvId = null;
+                                          _rdvEnAttente = [];
                                         });
                                         _clientFocusNode.unfocus();
+                                        // Charger les RDV en attente pour ce client
+                                        final rdvs = await ref.read(databaseProvider).getRdvEnAttenteClient(c.id);
+                                        if (mounted) setState(() => _rdvEnAttente = rdvs);
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -288,7 +300,67 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                         );
                       },
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
+
+                    // Lier à un RDV existant
+                    if (_rdvEnAttente.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.event_available, color: Theme.of(context).colorScheme.tertiary, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Lier à un rendez-vous existant',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<int?>(
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.surface,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              dropdownColor: Theme.of(context).colorScheme.surfaceContainer,
+                              value: _selectedRdvId,
+                              hint: const Text('Aucun RDV sélectionné'),
+                              items: [
+                                const DropdownMenuItem<int?>(value: null, child: Text('Aucun RDV')),
+                                ..._rdvEnAttente.map((rdv) {
+                                  final label = DateFormat('dd/MM/yyyy HH:mm').format(rdv.dateRdv);
+                                  return DropdownMenuItem<int?>(value: rdv.id, child: Text(label));
+                                }),
+                              ],
+                              onChanged: (rdvId) {
+                                setState(() => _selectedRdvId = rdvId);
+                                if (rdvId != null) {
+                                  final rdv = _rdvEnAttente.firstWhere((r) => r.id == rdvId);
+                                  setState(() {
+                                    _selectedCoiffeurId = rdv.coiffeurId;
+                                    _typeCoupe = rdv.typeCoupe;
+                                    if (rdv.note != null && rdv.note!.isNotEmpty) {
+                                      _noteController.text = rdv.note!;
+                                    }
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
 
                     // Progression fidélité
                     if (selectedClient != null) ...[
@@ -672,6 +744,26 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       dateVisite: _selectedDate,
     );
 
+    // Marquer le RDV comme honoré si un RDV était lié
+    if (_selectedRdvId != null) {
+      await ref.read(databaseProvider).updateStatutRdv(_selectedRdvId!, 'honore');
+      // Sync vers Supabase
+      final updatedRdvs = await ref.read(databaseProvider).getRdvEnAttenteClient(client.id);
+      final rdv = _rdvEnAttente.firstWhere((r) => r.id == _selectedRdvId, orElse: () => _rdvEnAttente.first);
+      SyncService.syncRendezVous(RendezVousData(
+        id: rdv.id,
+        clientId: rdv.clientId,
+        coiffeurId: rdv.coiffeurId,
+        dateRdv: rdv.dateRdv,
+        typeCoupe: rdv.typeCoupe,
+        statut: 'honore',
+        note: rdv.note,
+        dateCreation: rdv.dateCreation,
+      ));
+      ref.invalidate(rendezVousProvider);
+      ref.invalidate(rdvAujourdhuilProvider);
+    }
+
     final mockVisite = Visite(
       id: 0,
       clientId: client.id,
@@ -703,6 +795,10 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         _useGratuite = false;
         _noteController.clear();
         _selectedDate = DateTime.now();
+        _selectedRdvId = null;
+        _rdvEnAttente = [];
+        _clientSearchController.clear();
+        _selectedCoiffeurId = null;
       });
     }
   }

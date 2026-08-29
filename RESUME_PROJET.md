@@ -12,11 +12,12 @@ Ce fichier a pour but de documenter l'état actuel du projet pour permettre à u
 
 ## 2. ARCHITECTURE DES DONNÉES (Drift / SQLite)
 L'application fonctionne en mode **Offline-first**. La source de vérité est la base SQLite locale.
-Il y a 4 tables principales (`lib/data/tables.dart`) :
-- **Clients** : `id`, `nom`, `prenom`, `telephone`, `notes`, `total_coupes` (historique ne baissant jamais), `gratuites_disponibles` (s'incrémente toutes les 4 coupes payantes, se décrémente lors d'une coupe gratuite), `date_creation`.
-- **Coiffeurs** : `id`, `nom`, `prenom`, `specialite`, `actif`, `photo_path`, `nationalite`, `lieu_naissance`, `date_naissance`.
-- **Visites (Transactions)** : `id`, `client_id`, `coiffeur_id`, `date_visite`, `type_coupe` (classique/premium), `montant`, `est_gratuite`, `note`.
+Il y a 5 tables principales (`lib/data/tables.dart`) :
+- **Clients** : `id`, `nom`, `prenom`, `telephone`, `notes`, `total_coupes`, `gratuites_disponibles`, `date_creation`.
+- **Coiffeurs** : `id`, `nom`, `prenom`, `specialite`, `actif`, `photo_path`, `nationalite`, `lieu_naissance`, `date_naissance`, `adresse`.
+- **Visites (Transactions)** : `id`, `client_id`, `coiffeur_id`, `date_visite`, `type_coupe`, `montant`, `est_gratuite`, `note`.
 - **Parametres** : `id`, `motDePasse`, `nomSalon`, `themeClair`. Cette table a une seule ligne (ID: 1) et n'est pas (encore) synchronisée sur Supabase.
+- **RendezVous** : `id`, `client_id`, `coiffeur_id`, `date_rdv`, `type_coupe`, `statut` (en_attente/honore/annule), `note`, `date_creation`. Migration Drift v5.
 
 ## 3. LOGIQUE DE SYNCHRONISATION (Supabase)
 Le fichier `lib/services/sync_service.dart` gère la synchronisation vers Supabase.
@@ -29,13 +30,14 @@ Le fichier `lib/services/sync_service.dart` gère la synchronisation vers Supaba
 L'interface est construite avec un thème sombre personnalisé (`lib/theme/app_theme.dart`).
 La navigation principale est gérée par `lib/ui/layout/main_layout.dart` qui contient une `NavigationRail` à gauche avec un **indicateur de connexion réseau (Supabase) en bas**.
 
-L'application contient 6 écrans majeurs / onglets :
+L'application contient 7 écrans majeurs / onglets :
 1. **Dashboard** : Affiche les KPI (Clients, CA, Passages), un graphique des ventes, et les statistiques des coiffeurs actifs. Les données sont agrégées par `dashboard_provider.dart`.
-2. **Paiement** : Formulaire complexe gérant la création d'une visite. Intègre une logique automatique de fidélité (calcul des coupes gratuites). Génère un reçu PDF à la validation via `pdf_service.dart`.
-3. **Clients** : Liste des clients avec fonction de recherche et formulaire d'ajout.
-4. **Coiffeurs** : Liste et gestion des coiffeurs du salon.
-5. **Inventaire** : Outil de reporting. Filtre les visites par période (Journalier, Mensuel, etc.), affiche des KPIs dynamiques et permet de générer un rapport PDF complet.
-6. **Paramètres** : Onglet (accessible en bas à gauche) permettant de changer le nom du salon, basculer le thème (clair/sombre), et définir un mot de passe de verrouillage au démarrage de l'app.
+2. **Paiement** : Formulaire complexe gérant la création d'une visite. Intègre une logique automatique de fidélité (calcul des coupes gratuites). Génère un reçu PDF à la validation via `pdf_service.dart`. Propose également de lier un RDV en attente pour le pré-remplissage automatique.
+3. **Rendez-vous** : Onglet complet de gestion des RDV avec 3 vues (Liste, Jour, Semaine), création via formulaire dialog, et actions (Honoré/Annulé/Supprimer). Badge rouge sur l'icône sidebar indique les RDV du jour en attente.
+4. **Clients** : Liste des clients avec fonction de recherche et formulaire d'ajout.
+5. **Coiffeurs** : Liste et gestion des coiffeurs du salon.
+6. **Inventaire** : Outil de reporting. Filtre les visites par période (Journalier, Mensuel, etc.), affiche des KPIs dynamiques et permet de générer un rapport PDF complet.
+7. **Paramètres** : Onglet (accessible en bas à gauche) permettant de changer le nom du salon, basculer le thème (clair/sombre), et définir un mot de passe de verrouillage au démarrage de l'app.
 
 ## 5. RÈGLES À RESPECTER POUR L'IA SUIVANTE
 1. **Ne jamais modifier les tables Drift existantes** sans générer la migration SQLite appropriée (via `schemaVersion` dans `database.dart`).
@@ -55,3 +57,22 @@ L'application contient 6 écrans majeurs / onglets :
 - **L'onglet Paramètres a été implémenté** : Il utilise Drift (migration v4 vers la table `Parametres`) pour stocker le nom du salon, le thème et le mot de passe. Le système de verrouillage (LoginScreen) s'active automatiquement si un mot de passe est défini. Les PDFs s'adaptent désormais dynamiquement au nom du salon.
 - **Couleur des boutons personnalisable** : La couleur des boutons est stockée dans `shared_preferences` (clé: `button_color`) via `lib/providers/color_provider.dart`. La palette de 10 couleurs est disponible dans les Paramètres. La valeur par défaut est le violet `0xFF5E54A4`. Le thème (`app_theme.dart`) accepte maintenant un paramètre `buttonColor` dans ses fonctions `darkTheme(buttonColor:)` et `lightTheme(buttonColor:)`.
 - **Thème clair corrigé** : Les couleurs hardcodées (ex: `Color(0xFF121212)`, `Colors.white`) ont été remplacées dans tous les écrans par des appels `Theme.of(context)` pour que le thème clair s'applique partout.
+- **L'onglet Rendez-vous a été implémenté** : Migration Drift v5, table `RendezVous`, providers (`rendez_vous_provider.dart`), écran 3 vues (`rendez_vous_screen.dart`), formulaire de création (`nouveau_rdv_screen.dart`). Lien avec l'onglet Paiement pour pré-remplissage et marquage automatique 'honore'. Badge sidebar avec compteur temps réel. Synchronisation Supabase via `syncRendezVous` et intégration dans `syncAll`.
+
+## 7. SCRIPT SQL SUPABASE — TABLE rendez_vous
+
+À créer manuellement dans le projet Supabase :
+
+```sql
+CREATE TABLE rendez_vous (
+  id BIGINT PRIMARY KEY,
+  client_id BIGINT REFERENCES clients(id),
+  coiffeur_id BIGINT REFERENCES coiffeurs(id),
+  date_rdv TIMESTAMPTZ NOT NULL,
+  type_coupe TEXT NOT NULL,
+  statut TEXT NOT NULL DEFAULT 'en_attente',
+  note TEXT,
+  date_creation TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE rendez_vous REPLICA IDENTITY FULL;
+```

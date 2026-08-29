@@ -1952,6 +1952,512 @@ class ParametresCompanion extends UpdateCompanion<Parametre> {
   }
 }
 
+class $RendezVousTable extends RendezVous
+    with TableInfo<$RendezVousTable, RendezVousData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RendezVousTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<int> clientId = GeneratedColumn<int>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES clients (id)',
+    ),
+  );
+  static const VerificationMeta _coiffeurIdMeta = const VerificationMeta(
+    'coiffeurId',
+  );
+  @override
+  late final GeneratedColumn<int> coiffeurId = GeneratedColumn<int>(
+    'coiffeur_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES coiffeurs (id)',
+    ),
+  );
+  static const VerificationMeta _dateRdvMeta = const VerificationMeta(
+    'dateRdv',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dateRdv = GeneratedColumn<DateTime>(
+    'date_rdv',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeCoupeMeta = const VerificationMeta(
+    'typeCoupe',
+  );
+  @override
+  late final GeneratedColumn<String> typeCoupe = GeneratedColumn<String>(
+    'type_coupe',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statutMeta = const VerificationMeta('statut');
+  @override
+  late final GeneratedColumn<String> statut = GeneratedColumn<String>(
+    'statut',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('en_attente'),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dateCreationMeta = const VerificationMeta(
+    'dateCreation',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dateCreation = GeneratedColumn<DateTime>(
+    'date_creation',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    clientId,
+    coiffeurId,
+    dateRdv,
+    typeCoupe,
+    statut,
+    note,
+    dateCreation,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rendez_vous';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RendezVousData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('coiffeur_id')) {
+      context.handle(
+        _coiffeurIdMeta,
+        coiffeurId.isAcceptableOrUnknown(data['coiffeur_id']!, _coiffeurIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_coiffeurIdMeta);
+    }
+    if (data.containsKey('date_rdv')) {
+      context.handle(
+        _dateRdvMeta,
+        dateRdv.isAcceptableOrUnknown(data['date_rdv']!, _dateRdvMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateRdvMeta);
+    }
+    if (data.containsKey('type_coupe')) {
+      context.handle(
+        _typeCoupeMeta,
+        typeCoupe.isAcceptableOrUnknown(data['type_coupe']!, _typeCoupeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeCoupeMeta);
+    }
+    if (data.containsKey('statut')) {
+      context.handle(
+        _statutMeta,
+        statut.isAcceptableOrUnknown(data['statut']!, _statutMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('date_creation')) {
+      context.handle(
+        _dateCreationMeta,
+        dateCreation.isAcceptableOrUnknown(
+          data['date_creation']!,
+          _dateCreationMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RendezVousData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RendezVousData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}client_id'],
+      )!,
+      coiffeurId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}coiffeur_id'],
+      )!,
+      dateRdv: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date_rdv'],
+      )!,
+      typeCoupe: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type_coupe'],
+      )!,
+      statut: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}statut'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      dateCreation: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date_creation'],
+      )!,
+    );
+  }
+
+  @override
+  $RendezVousTable createAlias(String alias) {
+    return $RendezVousTable(attachedDatabase, alias);
+  }
+}
+
+class RendezVousData extends DataClass implements Insertable<RendezVousData> {
+  final int id;
+  final int clientId;
+  final int coiffeurId;
+  final DateTime dateRdv;
+  final String typeCoupe;
+  final String statut;
+  final String? note;
+  final DateTime dateCreation;
+  const RendezVousData({
+    required this.id,
+    required this.clientId,
+    required this.coiffeurId,
+    required this.dateRdv,
+    required this.typeCoupe,
+    required this.statut,
+    this.note,
+    required this.dateCreation,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['client_id'] = Variable<int>(clientId);
+    map['coiffeur_id'] = Variable<int>(coiffeurId);
+    map['date_rdv'] = Variable<DateTime>(dateRdv);
+    map['type_coupe'] = Variable<String>(typeCoupe);
+    map['statut'] = Variable<String>(statut);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['date_creation'] = Variable<DateTime>(dateCreation);
+    return map;
+  }
+
+  RendezVousCompanion toCompanion(bool nullToAbsent) {
+    return RendezVousCompanion(
+      id: Value(id),
+      clientId: Value(clientId),
+      coiffeurId: Value(coiffeurId),
+      dateRdv: Value(dateRdv),
+      typeCoupe: Value(typeCoupe),
+      statut: Value(statut),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      dateCreation: Value(dateCreation),
+    );
+  }
+
+  factory RendezVousData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RendezVousData(
+      id: serializer.fromJson<int>(json['id']),
+      clientId: serializer.fromJson<int>(json['clientId']),
+      coiffeurId: serializer.fromJson<int>(json['coiffeurId']),
+      dateRdv: serializer.fromJson<DateTime>(json['dateRdv']),
+      typeCoupe: serializer.fromJson<String>(json['typeCoupe']),
+      statut: serializer.fromJson<String>(json['statut']),
+      note: serializer.fromJson<String?>(json['note']),
+      dateCreation: serializer.fromJson<DateTime>(json['dateCreation']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'clientId': serializer.toJson<int>(clientId),
+      'coiffeurId': serializer.toJson<int>(coiffeurId),
+      'dateRdv': serializer.toJson<DateTime>(dateRdv),
+      'typeCoupe': serializer.toJson<String>(typeCoupe),
+      'statut': serializer.toJson<String>(statut),
+      'note': serializer.toJson<String?>(note),
+      'dateCreation': serializer.toJson<DateTime>(dateCreation),
+    };
+  }
+
+  RendezVousData copyWith({
+    int? id,
+    int? clientId,
+    int? coiffeurId,
+    DateTime? dateRdv,
+    String? typeCoupe,
+    String? statut,
+    Value<String?> note = const Value.absent(),
+    DateTime? dateCreation,
+  }) => RendezVousData(
+    id: id ?? this.id,
+    clientId: clientId ?? this.clientId,
+    coiffeurId: coiffeurId ?? this.coiffeurId,
+    dateRdv: dateRdv ?? this.dateRdv,
+    typeCoupe: typeCoupe ?? this.typeCoupe,
+    statut: statut ?? this.statut,
+    note: note.present ? note.value : this.note,
+    dateCreation: dateCreation ?? this.dateCreation,
+  );
+  RendezVousData copyWithCompanion(RendezVousCompanion data) {
+    return RendezVousData(
+      id: data.id.present ? data.id.value : this.id,
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      coiffeurId: data.coiffeurId.present
+          ? data.coiffeurId.value
+          : this.coiffeurId,
+      dateRdv: data.dateRdv.present ? data.dateRdv.value : this.dateRdv,
+      typeCoupe: data.typeCoupe.present ? data.typeCoupe.value : this.typeCoupe,
+      statut: data.statut.present ? data.statut.value : this.statut,
+      note: data.note.present ? data.note.value : this.note,
+      dateCreation: data.dateCreation.present
+          ? data.dateCreation.value
+          : this.dateCreation,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RendezVousData(')
+          ..write('id: $id, ')
+          ..write('clientId: $clientId, ')
+          ..write('coiffeurId: $coiffeurId, ')
+          ..write('dateRdv: $dateRdv, ')
+          ..write('typeCoupe: $typeCoupe, ')
+          ..write('statut: $statut, ')
+          ..write('note: $note, ')
+          ..write('dateCreation: $dateCreation')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    clientId,
+    coiffeurId,
+    dateRdv,
+    typeCoupe,
+    statut,
+    note,
+    dateCreation,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RendezVousData &&
+          other.id == this.id &&
+          other.clientId == this.clientId &&
+          other.coiffeurId == this.coiffeurId &&
+          other.dateRdv == this.dateRdv &&
+          other.typeCoupe == this.typeCoupe &&
+          other.statut == this.statut &&
+          other.note == this.note &&
+          other.dateCreation == this.dateCreation);
+}
+
+class RendezVousCompanion extends UpdateCompanion<RendezVousData> {
+  final Value<int> id;
+  final Value<int> clientId;
+  final Value<int> coiffeurId;
+  final Value<DateTime> dateRdv;
+  final Value<String> typeCoupe;
+  final Value<String> statut;
+  final Value<String?> note;
+  final Value<DateTime> dateCreation;
+  const RendezVousCompanion({
+    this.id = const Value.absent(),
+    this.clientId = const Value.absent(),
+    this.coiffeurId = const Value.absent(),
+    this.dateRdv = const Value.absent(),
+    this.typeCoupe = const Value.absent(),
+    this.statut = const Value.absent(),
+    this.note = const Value.absent(),
+    this.dateCreation = const Value.absent(),
+  });
+  RendezVousCompanion.insert({
+    this.id = const Value.absent(),
+    required int clientId,
+    required int coiffeurId,
+    required DateTime dateRdv,
+    required String typeCoupe,
+    this.statut = const Value.absent(),
+    this.note = const Value.absent(),
+    this.dateCreation = const Value.absent(),
+  }) : clientId = Value(clientId),
+       coiffeurId = Value(coiffeurId),
+       dateRdv = Value(dateRdv),
+       typeCoupe = Value(typeCoupe);
+  static Insertable<RendezVousData> custom({
+    Expression<int>? id,
+    Expression<int>? clientId,
+    Expression<int>? coiffeurId,
+    Expression<DateTime>? dateRdv,
+    Expression<String>? typeCoupe,
+    Expression<String>? statut,
+    Expression<String>? note,
+    Expression<DateTime>? dateCreation,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (clientId != null) 'client_id': clientId,
+      if (coiffeurId != null) 'coiffeur_id': coiffeurId,
+      if (dateRdv != null) 'date_rdv': dateRdv,
+      if (typeCoupe != null) 'type_coupe': typeCoupe,
+      if (statut != null) 'statut': statut,
+      if (note != null) 'note': note,
+      if (dateCreation != null) 'date_creation': dateCreation,
+    });
+  }
+
+  RendezVousCompanion copyWith({
+    Value<int>? id,
+    Value<int>? clientId,
+    Value<int>? coiffeurId,
+    Value<DateTime>? dateRdv,
+    Value<String>? typeCoupe,
+    Value<String>? statut,
+    Value<String?>? note,
+    Value<DateTime>? dateCreation,
+  }) {
+    return RendezVousCompanion(
+      id: id ?? this.id,
+      clientId: clientId ?? this.clientId,
+      coiffeurId: coiffeurId ?? this.coiffeurId,
+      dateRdv: dateRdv ?? this.dateRdv,
+      typeCoupe: typeCoupe ?? this.typeCoupe,
+      statut: statut ?? this.statut,
+      note: note ?? this.note,
+      dateCreation: dateCreation ?? this.dateCreation,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (clientId.present) {
+      map['client_id'] = Variable<int>(clientId.value);
+    }
+    if (coiffeurId.present) {
+      map['coiffeur_id'] = Variable<int>(coiffeurId.value);
+    }
+    if (dateRdv.present) {
+      map['date_rdv'] = Variable<DateTime>(dateRdv.value);
+    }
+    if (typeCoupe.present) {
+      map['type_coupe'] = Variable<String>(typeCoupe.value);
+    }
+    if (statut.present) {
+      map['statut'] = Variable<String>(statut.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (dateCreation.present) {
+      map['date_creation'] = Variable<DateTime>(dateCreation.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RendezVousCompanion(')
+          ..write('id: $id, ')
+          ..write('clientId: $clientId, ')
+          ..write('coiffeurId: $coiffeurId, ')
+          ..write('dateRdv: $dateRdv, ')
+          ..write('typeCoupe: $typeCoupe, ')
+          ..write('statut: $statut, ')
+          ..write('note: $note, ')
+          ..write('dateCreation: $dateCreation')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1959,6 +2465,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CoiffeursTable coiffeurs = $CoiffeursTable(this);
   late final $VisitesTable visites = $VisitesTable(this);
   late final $ParametresTable parametres = $ParametresTable(this);
+  late final $RendezVousTable rendezVous = $RendezVousTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1968,6 +2475,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     coiffeurs,
     visites,
     parametres,
+    rendezVous,
   ];
 }
 
@@ -2012,6 +2520,24 @@ final class $$ClientsTableReferences
     ).filter((f) => f.clientId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_visitesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$RendezVousTable, List<RendezVousData>>
+  _rendezVousRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.rendezVous,
+    aliasName: $_aliasNameGenerator(db.clients.id, db.rendezVous.clientId),
+  );
+
+  $$RendezVousTableProcessedTableManager get rendezVousRefs {
+    final manager = $$RendezVousTableTableManager(
+      $_db,
+      $_db.rendezVous,
+    ).filter((f) => f.clientId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_rendezVousRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2083,6 +2609,31 @@ class $$ClientsTableFilterComposer
           }) => $$VisitesTableFilterComposer(
             $db: $db,
             $table: $db.visites,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> rendezVousRefs(
+    Expression<bool> Function($$RendezVousTableFilterComposer f) f,
+  ) {
+    final $$RendezVousTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rendezVous,
+      getReferencedColumn: (t) => t.clientId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RendezVousTableFilterComposer(
+            $db: $db,
+            $table: $db.rendezVous,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2206,6 +2757,31 @@ class $$ClientsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> rendezVousRefs<T extends Object>(
+    Expression<T> Function($$RendezVousTableAnnotationComposer a) f,
+  ) {
+    final $$RendezVousTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rendezVous,
+      getReferencedColumn: (t) => t.clientId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RendezVousTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rendezVous,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ClientsTableTableManager
@@ -2221,7 +2797,7 @@ class $$ClientsTableTableManager
           $$ClientsTableUpdateCompanionBuilder,
           (Client, $$ClientsTableReferences),
           Client,
-          PrefetchHooks Function({bool visitesRefs})
+          PrefetchHooks Function({bool visitesRefs, bool rendezVousRefs})
         > {
   $$ClientsTableTableManager(_$AppDatabase db, $ClientsTable table)
     : super(
@@ -2282,28 +2858,63 @@ class $$ClientsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({visitesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (visitesRefs) db.visites],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (visitesRefs)
-                    await $_getPrefetchedData<Client, $ClientsTable, Visite>(
-                      currentTable: table,
-                      referencedTable: $$ClientsTableReferences
-                          ._visitesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ClientsTableReferences(db, table, p0).visitesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.clientId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({visitesRefs = false, rendezVousRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (visitesRefs) db.visites,
+                    if (rendezVousRefs) db.rendezVous,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (visitesRefs)
+                        await $_getPrefetchedData<
+                          Client,
+                          $ClientsTable,
+                          Visite
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ClientsTableReferences
+                              ._visitesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ClientsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).visitesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.clientId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (rendezVousRefs)
+                        await $_getPrefetchedData<
+                          Client,
+                          $ClientsTable,
+                          RendezVousData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ClientsTableReferences
+                              ._rendezVousRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ClientsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).rendezVousRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.clientId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2320,7 +2931,7 @@ typedef $$ClientsTableProcessedTableManager =
       $$ClientsTableUpdateCompanionBuilder,
       (Client, $$ClientsTableReferences),
       Client,
-      PrefetchHooks Function({bool visitesRefs})
+      PrefetchHooks Function({bool visitesRefs, bool rendezVousRefs})
     >;
 typedef $$CoiffeursTableCreateCompanionBuilder =
     CoiffeursCompanion Function({
@@ -2367,6 +2978,24 @@ final class $$CoiffeursTableReferences
     ).filter((f) => f.coiffeurId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_visitesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$RendezVousTable, List<RendezVousData>>
+  _rendezVousRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.rendezVous,
+    aliasName: $_aliasNameGenerator(db.coiffeurs.id, db.rendezVous.coiffeurId),
+  );
+
+  $$RendezVousTableProcessedTableManager get rendezVousRefs {
+    final manager = $$RendezVousTableTableManager(
+      $_db,
+      $_db.rendezVous,
+    ).filter((f) => f.coiffeurId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_rendezVousRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2448,6 +3077,31 @@ class $$CoiffeursTableFilterComposer
           }) => $$VisitesTableFilterComposer(
             $db: $db,
             $table: $db.visites,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> rendezVousRefs(
+    Expression<bool> Function($$RendezVousTableFilterComposer f) f,
+  ) {
+    final $$RendezVousTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rendezVous,
+      getReferencedColumn: (t) => t.coiffeurId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RendezVousTableFilterComposer(
+            $db: $db,
+            $table: $db.rendezVous,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2589,6 +3243,31 @@ class $$CoiffeursTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> rendezVousRefs<T extends Object>(
+    Expression<T> Function($$RendezVousTableAnnotationComposer a) f,
+  ) {
+    final $$RendezVousTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.rendezVous,
+      getReferencedColumn: (t) => t.coiffeurId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RendezVousTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rendezVous,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CoiffeursTableTableManager
@@ -2604,7 +3283,7 @@ class $$CoiffeursTableTableManager
           $$CoiffeursTableUpdateCompanionBuilder,
           (Coiffeur, $$CoiffeursTableReferences),
           Coiffeur,
-          PrefetchHooks Function({bool visitesRefs})
+          PrefetchHooks Function({bool visitesRefs, bool rendezVousRefs})
         > {
   $$CoiffeursTableTableManager(_$AppDatabase db, $CoiffeursTable table)
     : super(
@@ -2673,32 +3352,63 @@ class $$CoiffeursTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({visitesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (visitesRefs) db.visites],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (visitesRefs)
-                    await $_getPrefetchedData<
-                      Coiffeur,
-                      $CoiffeursTable,
-                      Visite
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CoiffeursTableReferences
-                          ._visitesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CoiffeursTableReferences(db, table, p0).visitesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.coiffeurId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({visitesRefs = false, rendezVousRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (visitesRefs) db.visites,
+                    if (rendezVousRefs) db.rendezVous,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (visitesRefs)
+                        await $_getPrefetchedData<
+                          Coiffeur,
+                          $CoiffeursTable,
+                          Visite
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CoiffeursTableReferences
+                              ._visitesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CoiffeursTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).visitesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.coiffeurId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (rendezVousRefs)
+                        await $_getPrefetchedData<
+                          Coiffeur,
+                          $CoiffeursTable,
+                          RendezVousData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CoiffeursTableReferences
+                              ._rendezVousRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CoiffeursTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).rendezVousRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.coiffeurId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2715,7 +3425,7 @@ typedef $$CoiffeursTableProcessedTableManager =
       $$CoiffeursTableUpdateCompanionBuilder,
       (Coiffeur, $$CoiffeursTableReferences),
       Coiffeur,
-      PrefetchHooks Function({bool visitesRefs})
+      PrefetchHooks Function({bool visitesRefs, bool rendezVousRefs})
     >;
 typedef $$VisitesTableCreateCompanionBuilder =
     VisitesCompanion Function({
@@ -3353,6 +4063,464 @@ typedef $$ParametresTableProcessedTableManager =
       Parametre,
       PrefetchHooks Function()
     >;
+typedef $$RendezVousTableCreateCompanionBuilder =
+    RendezVousCompanion Function({
+      Value<int> id,
+      required int clientId,
+      required int coiffeurId,
+      required DateTime dateRdv,
+      required String typeCoupe,
+      Value<String> statut,
+      Value<String?> note,
+      Value<DateTime> dateCreation,
+    });
+typedef $$RendezVousTableUpdateCompanionBuilder =
+    RendezVousCompanion Function({
+      Value<int> id,
+      Value<int> clientId,
+      Value<int> coiffeurId,
+      Value<DateTime> dateRdv,
+      Value<String> typeCoupe,
+      Value<String> statut,
+      Value<String?> note,
+      Value<DateTime> dateCreation,
+    });
+
+final class $$RendezVousTableReferences
+    extends BaseReferences<_$AppDatabase, $RendezVousTable, RendezVousData> {
+  $$RendezVousTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ClientsTable _clientIdTable(_$AppDatabase db) => db.clients
+      .createAlias($_aliasNameGenerator(db.rendezVous.clientId, db.clients.id));
+
+  $$ClientsTableProcessedTableManager get clientId {
+    final $_column = $_itemColumn<int>('client_id')!;
+
+    final manager = $$ClientsTableTableManager(
+      $_db,
+      $_db.clients,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_clientIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CoiffeursTable _coiffeurIdTable(_$AppDatabase db) =>
+      db.coiffeurs.createAlias(
+        $_aliasNameGenerator(db.rendezVous.coiffeurId, db.coiffeurs.id),
+      );
+
+  $$CoiffeursTableProcessedTableManager get coiffeurId {
+    final $_column = $_itemColumn<int>('coiffeur_id')!;
+
+    final manager = $$CoiffeursTableTableManager(
+      $_db,
+      $_db.coiffeurs,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_coiffeurIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$RendezVousTableFilterComposer
+    extends Composer<_$AppDatabase, $RendezVousTable> {
+  $$RendezVousTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dateRdv => $composableBuilder(
+    column: $table.dateRdv,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get typeCoupe => $composableBuilder(
+    column: $table.typeCoupe,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get statut => $composableBuilder(
+    column: $table.statut,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dateCreation => $composableBuilder(
+    column: $table.dateCreation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ClientsTableFilterComposer get clientId {
+    final $$ClientsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.clientId,
+      referencedTable: $db.clients,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClientsTableFilterComposer(
+            $db: $db,
+            $table: $db.clients,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CoiffeursTableFilterComposer get coiffeurId {
+    final $$CoiffeursTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.coiffeurId,
+      referencedTable: $db.coiffeurs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CoiffeursTableFilterComposer(
+            $db: $db,
+            $table: $db.coiffeurs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RendezVousTableOrderingComposer
+    extends Composer<_$AppDatabase, $RendezVousTable> {
+  $$RendezVousTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dateRdv => $composableBuilder(
+    column: $table.dateRdv,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get typeCoupe => $composableBuilder(
+    column: $table.typeCoupe,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get statut => $composableBuilder(
+    column: $table.statut,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dateCreation => $composableBuilder(
+    column: $table.dateCreation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ClientsTableOrderingComposer get clientId {
+    final $$ClientsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.clientId,
+      referencedTable: $db.clients,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClientsTableOrderingComposer(
+            $db: $db,
+            $table: $db.clients,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CoiffeursTableOrderingComposer get coiffeurId {
+    final $$CoiffeursTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.coiffeurId,
+      referencedTable: $db.coiffeurs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CoiffeursTableOrderingComposer(
+            $db: $db,
+            $table: $db.coiffeurs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RendezVousTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RendezVousTable> {
+  $$RendezVousTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dateRdv =>
+      $composableBuilder(column: $table.dateRdv, builder: (column) => column);
+
+  GeneratedColumn<String> get typeCoupe =>
+      $composableBuilder(column: $table.typeCoupe, builder: (column) => column);
+
+  GeneratedColumn<String> get statut =>
+      $composableBuilder(column: $table.statut, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dateCreation => $composableBuilder(
+    column: $table.dateCreation,
+    builder: (column) => column,
+  );
+
+  $$ClientsTableAnnotationComposer get clientId {
+    final $$ClientsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.clientId,
+      referencedTable: $db.clients,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClientsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.clients,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CoiffeursTableAnnotationComposer get coiffeurId {
+    final $$CoiffeursTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.coiffeurId,
+      referencedTable: $db.coiffeurs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CoiffeursTableAnnotationComposer(
+            $db: $db,
+            $table: $db.coiffeurs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RendezVousTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RendezVousTable,
+          RendezVousData,
+          $$RendezVousTableFilterComposer,
+          $$RendezVousTableOrderingComposer,
+          $$RendezVousTableAnnotationComposer,
+          $$RendezVousTableCreateCompanionBuilder,
+          $$RendezVousTableUpdateCompanionBuilder,
+          (RendezVousData, $$RendezVousTableReferences),
+          RendezVousData,
+          PrefetchHooks Function({bool clientId, bool coiffeurId})
+        > {
+  $$RendezVousTableTableManager(_$AppDatabase db, $RendezVousTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RendezVousTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RendezVousTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RendezVousTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> clientId = const Value.absent(),
+                Value<int> coiffeurId = const Value.absent(),
+                Value<DateTime> dateRdv = const Value.absent(),
+                Value<String> typeCoupe = const Value.absent(),
+                Value<String> statut = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime> dateCreation = const Value.absent(),
+              }) => RendezVousCompanion(
+                id: id,
+                clientId: clientId,
+                coiffeurId: coiffeurId,
+                dateRdv: dateRdv,
+                typeCoupe: typeCoupe,
+                statut: statut,
+                note: note,
+                dateCreation: dateCreation,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int clientId,
+                required int coiffeurId,
+                required DateTime dateRdv,
+                required String typeCoupe,
+                Value<String> statut = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime> dateCreation = const Value.absent(),
+              }) => RendezVousCompanion.insert(
+                id: id,
+                clientId: clientId,
+                coiffeurId: coiffeurId,
+                dateRdv: dateRdv,
+                typeCoupe: typeCoupe,
+                statut: statut,
+                note: note,
+                dateCreation: dateCreation,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RendezVousTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({clientId = false, coiffeurId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (clientId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.clientId,
+                                referencedTable: $$RendezVousTableReferences
+                                    ._clientIdTable(db),
+                                referencedColumn: $$RendezVousTableReferences
+                                    ._clientIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (coiffeurId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.coiffeurId,
+                                referencedTable: $$RendezVousTableReferences
+                                    ._coiffeurIdTable(db),
+                                referencedColumn: $$RendezVousTableReferences
+                                    ._coiffeurIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$RendezVousTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RendezVousTable,
+      RendezVousData,
+      $$RendezVousTableFilterComposer,
+      $$RendezVousTableOrderingComposer,
+      $$RendezVousTableAnnotationComposer,
+      $$RendezVousTableCreateCompanionBuilder,
+      $$RendezVousTableUpdateCompanionBuilder,
+      (RendezVousData, $$RendezVousTableReferences),
+      RendezVousData,
+      PrefetchHooks Function({bool clientId, bool coiffeurId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3365,4 +4533,6 @@ class $AppDatabaseManager {
       $$VisitesTableTableManager(_db, _db.visites);
   $$ParametresTableTableManager get parametres =>
       $$ParametresTableTableManager(_db, _db.parametres);
+  $$RendezVousTableTableManager get rendezVous =>
+      $$RendezVousTableTableManager(_db, _db.rendezVous);
 }

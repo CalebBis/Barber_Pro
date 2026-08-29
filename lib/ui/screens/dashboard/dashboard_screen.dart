@@ -14,8 +14,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  String _chartFilter = '30 jours';
-
   @override
   Widget build(BuildContext context) {
     final dashboardData = ref.watch(dashboardProvider);
@@ -160,7 +158,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Chiffre d'affaires — 30 derniers jours",
+                "Chiffre d'affaires",
                 style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 20),
               ),
               Container(
@@ -170,10 +168,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   border: Border.all(color: Theme.of(context).dividerColor),
                 ),
                 child: Row(
-                  children: ['30 jours', 'Mensuel', 'Annuel'].map((filter) {
-                    final isSelected = _chartFilter == filter;
+                  children: [
+                    {'label': '7 jours', 'value': GraphiquePeriode.sept},
+                    {'label': '30 jours', 'value': GraphiquePeriode.trente},
+                    {'label': 'Mensuel', 'value': GraphiquePeriode.mensuel},
+                    {'label': 'Annuel', 'value': GraphiquePeriode.annuel},
+                  ].map((filterMap) {
+                    final filterLabel = filterMap['label'] as String;
+                    final filterValue = filterMap['value'] as GraphiquePeriode;
+                    final currentPeriode = ref.watch(graphiquePeriodeProvider);
+                    final isSelected = currentPeriode == filterValue;
                     return GestureDetector(
-                      onTap: () => setState(() => _chartFilter = filter),
+                      onTap: () => ref.read(graphiquePeriodeProvider.notifier).state = filterValue,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -181,7 +187,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          filter,
+                          filterLabel,
                           style: TextStyle(
                             color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -197,53 +203,107 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           SizedBox(height: 32),
           SizedBox(
             height: 250,
-            child: BarChart(
-              BarChartData(
-                borderData: FlBorderData(show: false),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: 20000,
-                  getDrawingHorizontalLine: (value) => FlLine(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.10), strokeWidth: 1),
-                ),
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      getTitlesWidget: (value, meta) => Text('${(value / 1000).toInt()}k', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54), fontSize: 12)),
+            child: ref.watch(graphiqueDataProvider).when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Erreur: $err')),
+              data: (graphData) {
+                if (graphData.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Aucune donnée',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     ),
+                  );
+                }
+
+                double maxY = 0;
+                for (var item in graphData) {
+                  if (item['ca'] > maxY) maxY = (item['ca'] as int).toDouble();
+                }
+                
+                if (maxY < 5000) {
+                  maxY = 5000;
+                } else {
+                  maxY = ((maxY * 1.2) / 1000).ceil() * 1000.0;
+                }
+                
+                double interval = maxY / 5;
+
+                return BarChart(
+                  BarChartData(
+                    borderData: FlBorderData(show: false),
+                    maxY: maxY,
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: interval,
+                      getDrawingHorizontalLine: (value) => FlLine(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.10),
+                        strokeWidth: 1,
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 40,
+                          interval: interval,
+                          getTitlesWidget: (value, meta) {
+                            if (value == maxY || value == 0) return const SizedBox.shrink();
+                            return Text(
+                              '${(value / 1000).toInt()}k',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+                                fontSize: 12,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            int index = value.toInt();
+                            if (index < 0 || index >= graphData.length) return const SizedBox.shrink();
+
+                            // Ne pas afficher tous les labels si 30 jours (1 sur 3)
+                            if (ref.read(graphiquePeriodeProvider) == GraphiquePeriode.trente && index % 3 != 0) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                graphData[index]['label'],
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    barGroups: List.generate(graphData.length, (index) {
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: (graphData[index]['ca'] as int).toDouble(),
+                            color: Theme.of(context).colorScheme.tertiary,
+                            width: 12,
+                            borderRadius: BorderRadius.circular(2),
+                          )
+                        ],
+                      );
+                    }),
                   ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        if (value % 3 != 0) return const SizedBox.shrink();
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text('${value.toInt()}/5', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54), fontSize: 12)), // Placeholder
-                        );
-                      },
-                    ),
-                  ),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                barGroups: [
-                  for (int i = 1; i <= 30; i++)
-                    BarChartGroupData(
-                      x: i,
-                      barRods: [
-                        BarChartRodData(
-                          toY: (80000 + (i * 2000) % 50000).toDouble(), // Placeholder data
-                          color: const Color(0xFF7C63EF), // Purple bar
-                          width: 12,
-                          borderRadius: BorderRadius.circular(2),
-                        )
-                      ],
-                    ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],

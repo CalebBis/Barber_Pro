@@ -101,9 +101,36 @@ class SyncService {
       }
       debugPrint('[SyncService] ${visites.length} visites synced');
 
+      // Sync tous les rendez-vous
+      final rdvs = await db.select(db.rendezVous).get();
+      for (final rdv in rdvs) {
+        await syncRendezVous(rdv);
+      }
+      debugPrint('[SyncService] ${rdvs.length} rendez-vous synced');
+
       debugPrint('[SyncService] syncAll termine avec succes !');
     } catch (e) {
       debugPrint('[SyncService] Erreur syncAll: $e');
+    }
+  }
+
+  /// Sync un rendez-vous vers Supabase (upsert)
+  static Future<void> syncRendezVous(RendezVousData rdv) async {
+    try {
+      await _client.from('rendez_vous').upsert({
+        'id': rdv.id,
+        'client_id': rdv.clientId,
+        'coiffeur_id': rdv.coiffeurId,
+        'date_rdv': rdv.dateRdv.toIso8601String(),
+        'type_coupe': rdv.typeCoupe,
+        'statut': rdv.statut,
+        'note': rdv.note,
+        'date_creation': rdv.dateCreation.toIso8601String(),
+      });
+      debugPrint('[SyncService] RendezVous ${rdv.id} synced');
+    } catch (e) {
+      debugPrint('[SyncService] Erreur sync rendez-vous ${rdv.id}: $e');
+      // Silencieux — ne jamais bloquer l'UI
     }
   }
 }
