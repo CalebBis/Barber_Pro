@@ -24,6 +24,7 @@ class Coiffeurs extends Table {
   TextColumn get lieuNaissance => text().nullable()();
   DateTimeColumn get dateNaissance => dateTime().nullable()();
   TextColumn get adresse => text().nullable()();
+  TextColumn get telephone => text().nullable()();
 }
 
 class Visites extends Table {

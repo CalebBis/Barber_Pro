@@ -11,13 +11,32 @@ import '../../../utils/text_utils.dart';
 class CoiffeursScreen extends ConsumerWidget {
   const CoiffeursScreen({super.key});
 
+  Widget _buildInfoRow(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final coiffeursState = ref.watch(coiffeursProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gestion des Coiffeurs'),
+        title: const Text('Gestion des Coiffeurs', style: TextStyle(color: Colors.white)),
         actions: [
           ElevatedButton.icon(
             onPressed: () => showDialog(
@@ -44,72 +63,143 @@ class CoiffeursScreen extends ConsumerWidget {
                 crossAxisCount: 3,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 1.5,
+                childAspectRatio: 1.15, // Réduit la hauteur des cartes par rapport à 0.85
               ),
               itemCount: coiffeurs.length,
               itemBuilder: (context, index) {
                 final c = coiffeurs[index];
                 return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (c.photoPath != null)
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundImage: FileImage(File(c.photoPath!)),
-                          )
-                        else
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: c.actif ? Theme.of(context).primaryColor : Colors.grey,
-                            child: Icon(Icons.person, size: 24, color: Theme.of(context).colorScheme.onBackground),
-                          ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${c.prenom} ${c.nom}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          c.specialite ?? 'Generaliste',
-                          style: Theme.of(context).textTheme.bodySmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (c.nationalite != null)
-                          Text(c.nationalite!, style: Theme.of(context).textTheme.bodySmall, overflow: TextOverflow.ellipsis),
-                        const Spacer(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  child: Stack(
+                    children: [
+                      // Contenu principal
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            // Photo
+                            if (c.photoPath != null)
+                              CircleAvatar(
+                                radius: 32,
+                                backgroundImage: FileImage(File(c.photoPath!)),
+                              )
+                            else
+                              CircleAvatar(
+                                radius: 32,
+                                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                                child: Text(
+                                  '${c.prenom.isNotEmpty ? c.prenom[0] : ''}${c.nom.isNotEmpty ? c.nom[0] : ''}',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 10),
+
+                            // Nom complet
+                            Text(
+                              '${c.prenom} ${c.nom}',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            // Spécialité
+                            if (c.specialite != null && c.specialite!.isNotEmpty)
+                              Text(
+                                c.specialite!,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                            const SizedBox(height: 10),
+                            const Divider(),
+                            const SizedBox(height: 6),
+
+                            // Infos supplémentaires — afficher seulement si non null
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (c.telephone != null && c.telephone!.isNotEmpty)
+                                      _buildInfoRow(context, Icons.phone, c.telephone!),
+                                    if (c.adresse != null && c.adresse!.isNotEmpty)
+                                      _buildInfoRow(context, Icons.location_on, c.adresse!),
+                                    if (c.nationalite != null && c.nationalite!.isNotEmpty)
+                                      _buildInfoRow(context, Icons.flag, c.nationalite!),
+                                    if (c.lieuNaissance != null && c.lieuNaissance!.isNotEmpty)
+                                      _buildInfoRow(context, Icons.place, c.lieuNaissance!),
+                                    if (c.dateNaissance != null)
+                                      _buildInfoRow(
+                                        context,
+                                        Icons.cake,
+                                        DateFormat('dd/MM/yyyy').format(c.dateNaissance!),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const Divider(),
+                            const SizedBox(height: 6),
+
+                            // Badge statut
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
-                                color: c.actif ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                                color: c.actif ? Colors.green.withOpacity(0.15) : Colors.red.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 c.actif ? 'Actif' : 'Inactif',
-                                style: TextStyle(color: c.actif ? Colors.green : Colors.red, fontSize: 12),
+                                style: TextStyle(
+                                  color: c.actif ? Colors.green : Colors.red,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 20),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => EditCoiffeurDialog(coiffeur: c),
-                                );
-                              },
+                          ],
+                        ),
+                      ),
+
+                      // 3 points en haut à droite
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.more_vert,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          ),
+                          onSelected: (value) {
+                            if (value == 'modifier') {
+                              showDialog(
+                                context: context,
+                                builder: (context) => EditCoiffeurDialog(coiffeur: c),
+                              );
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'modifier',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('Modifier'),
+                                ],
+                              ),
                             ),
                           ],
-                        )
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -131,6 +221,7 @@ class AddCoiffeurDialog extends ConsumerStatefulWidget {
 class _AddCoiffeurDialogState extends ConsumerState<AddCoiffeurDialog> {
   final nomController = TextEditingController();
   final prenomController = TextEditingController();
+  final telephoneController = TextEditingController();
   final specialiteController = TextEditingController();
   final nationaliteController = TextEditingController();
   final lieuNaissanceController = TextEditingController();
@@ -193,6 +284,15 @@ class _AddCoiffeurDialogState extends ConsumerState<AddCoiffeurDialog> {
               const SizedBox(height: 16),
               TextField(controller: specialiteController, decoration: const InputDecoration(labelText: 'Spécialité')),
               const SizedBox(height: 16),
+              TextField(
+                controller: telephoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Téléphone',
+                  prefixIcon: Icon(Icons.phone),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
               TextField(controller: adresseController, decoration: const InputDecoration(labelText: 'Adresse')),
               const SizedBox(height: 16),
               TextField(controller: nationaliteController, decoration: const InputDecoration(labelText: 'Nationalité')),
@@ -240,6 +340,7 @@ class _AddCoiffeurDialogState extends ConsumerState<AddCoiffeurDialog> {
                 lieuNaissance: toTitleCase(lieuNaissanceController.text),
                 dateNaissance: dateNaissance,
                 adresse: adresseController.text,
+                telephone: telephoneController.text.isEmpty ? null : telephoneController.text,
               );
               Navigator.pop(context);
             }
@@ -262,6 +363,7 @@ class EditCoiffeurDialog extends ConsumerStatefulWidget {
 class _EditCoiffeurDialogState extends ConsumerState<EditCoiffeurDialog> {
   late TextEditingController nomController;
   late TextEditingController prenomController;
+  late TextEditingController telephoneController;
   late TextEditingController specialiteController;
   late TextEditingController nationaliteController;
   late TextEditingController lieuNaissanceController;
@@ -274,6 +376,7 @@ class _EditCoiffeurDialogState extends ConsumerState<EditCoiffeurDialog> {
     super.initState();
     nomController = TextEditingController(text: widget.coiffeur.nom);
     prenomController = TextEditingController(text: widget.coiffeur.prenom);
+    telephoneController = TextEditingController(text: widget.coiffeur.telephone ?? '');
     specialiteController = TextEditingController(text: widget.coiffeur.specialite ?? '');
     nationaliteController = TextEditingController(text: widget.coiffeur.nationalite ?? '');
     lieuNaissanceController = TextEditingController(text: widget.coiffeur.lieuNaissance ?? '');
@@ -337,6 +440,15 @@ class _EditCoiffeurDialogState extends ConsumerState<EditCoiffeurDialog> {
               const SizedBox(height: 16),
               TextField(controller: specialiteController, decoration: const InputDecoration(labelText: 'Spécialité')),
               const SizedBox(height: 16),
+              TextField(
+                controller: telephoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Téléphone',
+                  prefixIcon: Icon(Icons.phone),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
               TextField(controller: adresseController, decoration: const InputDecoration(labelText: 'Adresse')),
               const SizedBox(height: 16),
               TextField(controller: nationaliteController, decoration: const InputDecoration(labelText: 'Nationalité')),
@@ -384,6 +496,7 @@ class _EditCoiffeurDialogState extends ConsumerState<EditCoiffeurDialog> {
                 lieuNaissance: lieuNaissanceController.text.isEmpty ? const Value(null) : Value(toTitleCase(lieuNaissanceController.text)),
                 dateNaissance: dateNaissance == null ? const Value(null) : Value(dateNaissance),
                 adresse: adresseController.text.isEmpty ? const Value(null) : Value(adresseController.text),
+                telephone: telephoneController.text.isEmpty ? const Value(null) : Value(telephoneController.text),
               );
               ref.read(coiffeursProvider.notifier).updateCoiffeur(updated);
               Navigator.pop(context);

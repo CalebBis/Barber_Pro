@@ -628,6 +628,17 @@ class $CoiffeursTable extends Coiffeurs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _telephoneMeta = const VerificationMeta(
+    'telephone',
+  );
+  @override
+  late final GeneratedColumn<String> telephone = GeneratedColumn<String>(
+    'telephone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -640,6 +651,7 @@ class $CoiffeursTable extends Coiffeurs
     lieuNaissance,
     dateNaissance,
     adresse,
+    telephone,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -723,6 +735,12 @@ class $CoiffeursTable extends Coiffeurs
         adresse.isAcceptableOrUnknown(data['adresse']!, _adresseMeta),
       );
     }
+    if (data.containsKey('telephone')) {
+      context.handle(
+        _telephoneMeta,
+        telephone.isAcceptableOrUnknown(data['telephone']!, _telephoneMeta),
+      );
+    }
     return context;
   }
 
@@ -772,6 +790,10 @@ class $CoiffeursTable extends Coiffeurs
         DriftSqlType.string,
         data['${effectivePrefix}adresse'],
       ),
+      telephone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}telephone'],
+      ),
     );
   }
 
@@ -792,6 +814,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
   final String? lieuNaissance;
   final DateTime? dateNaissance;
   final String? adresse;
+  final String? telephone;
   const Coiffeur({
     required this.id,
     required this.nom,
@@ -803,6 +826,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
     this.lieuNaissance,
     this.dateNaissance,
     this.adresse,
+    this.telephone,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -828,6 +852,9 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
     }
     if (!nullToAbsent || adresse != null) {
       map['adresse'] = Variable<String>(adresse);
+    }
+    if (!nullToAbsent || telephone != null) {
+      map['telephone'] = Variable<String>(telephone);
     }
     return map;
   }
@@ -856,6 +883,9 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
       adresse: adresse == null && nullToAbsent
           ? const Value.absent()
           : Value(adresse),
+      telephone: telephone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(telephone),
     );
   }
 
@@ -875,6 +905,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
       lieuNaissance: serializer.fromJson<String?>(json['lieuNaissance']),
       dateNaissance: serializer.fromJson<DateTime?>(json['dateNaissance']),
       adresse: serializer.fromJson<String?>(json['adresse']),
+      telephone: serializer.fromJson<String?>(json['telephone']),
     );
   }
   @override
@@ -891,6 +922,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
       'lieuNaissance': serializer.toJson<String?>(lieuNaissance),
       'dateNaissance': serializer.toJson<DateTime?>(dateNaissance),
       'adresse': serializer.toJson<String?>(adresse),
+      'telephone': serializer.toJson<String?>(telephone),
     };
   }
 
@@ -905,6 +937,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
     Value<String?> lieuNaissance = const Value.absent(),
     Value<DateTime?> dateNaissance = const Value.absent(),
     Value<String?> adresse = const Value.absent(),
+    Value<String?> telephone = const Value.absent(),
   }) => Coiffeur(
     id: id ?? this.id,
     nom: nom ?? this.nom,
@@ -920,6 +953,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
         ? dateNaissance.value
         : this.dateNaissance,
     adresse: adresse.present ? adresse.value : this.adresse,
+    telephone: telephone.present ? telephone.value : this.telephone,
   );
   Coiffeur copyWithCompanion(CoiffeursCompanion data) {
     return Coiffeur(
@@ -941,6 +975,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
           ? data.dateNaissance.value
           : this.dateNaissance,
       adresse: data.adresse.present ? data.adresse.value : this.adresse,
+      telephone: data.telephone.present ? data.telephone.value : this.telephone,
     );
   }
 
@@ -956,7 +991,8 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
           ..write('nationalite: $nationalite, ')
           ..write('lieuNaissance: $lieuNaissance, ')
           ..write('dateNaissance: $dateNaissance, ')
-          ..write('adresse: $adresse')
+          ..write('adresse: $adresse, ')
+          ..write('telephone: $telephone')
           ..write(')'))
         .toString();
   }
@@ -973,6 +1009,7 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
     lieuNaissance,
     dateNaissance,
     adresse,
+    telephone,
   );
   @override
   bool operator ==(Object other) =>
@@ -987,7 +1024,8 @@ class Coiffeur extends DataClass implements Insertable<Coiffeur> {
           other.nationalite == this.nationalite &&
           other.lieuNaissance == this.lieuNaissance &&
           other.dateNaissance == this.dateNaissance &&
-          other.adresse == this.adresse);
+          other.adresse == this.adresse &&
+          other.telephone == this.telephone);
 }
 
 class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
@@ -1001,6 +1039,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
   final Value<String?> lieuNaissance;
   final Value<DateTime?> dateNaissance;
   final Value<String?> adresse;
+  final Value<String?> telephone;
   const CoiffeursCompanion({
     this.id = const Value.absent(),
     this.nom = const Value.absent(),
@@ -1012,6 +1051,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
     this.lieuNaissance = const Value.absent(),
     this.dateNaissance = const Value.absent(),
     this.adresse = const Value.absent(),
+    this.telephone = const Value.absent(),
   });
   CoiffeursCompanion.insert({
     this.id = const Value.absent(),
@@ -1024,6 +1064,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
     this.lieuNaissance = const Value.absent(),
     this.dateNaissance = const Value.absent(),
     this.adresse = const Value.absent(),
+    this.telephone = const Value.absent(),
   }) : nom = Value(nom),
        prenom = Value(prenom);
   static Insertable<Coiffeur> custom({
@@ -1037,6 +1078,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
     Expression<String>? lieuNaissance,
     Expression<DateTime>? dateNaissance,
     Expression<String>? adresse,
+    Expression<String>? telephone,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1049,6 +1091,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
       if (lieuNaissance != null) 'lieu_naissance': lieuNaissance,
       if (dateNaissance != null) 'date_naissance': dateNaissance,
       if (adresse != null) 'adresse': adresse,
+      if (telephone != null) 'telephone': telephone,
     });
   }
 
@@ -1063,6 +1106,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
     Value<String?>? lieuNaissance,
     Value<DateTime?>? dateNaissance,
     Value<String?>? adresse,
+    Value<String?>? telephone,
   }) {
     return CoiffeursCompanion(
       id: id ?? this.id,
@@ -1075,6 +1119,7 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
       lieuNaissance: lieuNaissance ?? this.lieuNaissance,
       dateNaissance: dateNaissance ?? this.dateNaissance,
       adresse: adresse ?? this.adresse,
+      telephone: telephone ?? this.telephone,
     );
   }
 
@@ -1111,6 +1156,9 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
     if (adresse.present) {
       map['adresse'] = Variable<String>(adresse.value);
     }
+    if (telephone.present) {
+      map['telephone'] = Variable<String>(telephone.value);
+    }
     return map;
   }
 
@@ -1126,7 +1174,8 @@ class CoiffeursCompanion extends UpdateCompanion<Coiffeur> {
           ..write('nationalite: $nationalite, ')
           ..write('lieuNaissance: $lieuNaissance, ')
           ..write('dateNaissance: $dateNaissance, ')
-          ..write('adresse: $adresse')
+          ..write('adresse: $adresse, ')
+          ..write('telephone: $telephone')
           ..write(')'))
         .toString();
   }
@@ -2945,6 +2994,7 @@ typedef $$CoiffeursTableCreateCompanionBuilder =
       Value<String?> lieuNaissance,
       Value<DateTime?> dateNaissance,
       Value<String?> adresse,
+      Value<String?> telephone,
     });
 typedef $$CoiffeursTableUpdateCompanionBuilder =
     CoiffeursCompanion Function({
@@ -2958,6 +3008,7 @@ typedef $$CoiffeursTableUpdateCompanionBuilder =
       Value<String?> lieuNaissance,
       Value<DateTime?> dateNaissance,
       Value<String?> adresse,
+      Value<String?> telephone,
     });
 
 final class $$CoiffeursTableReferences
@@ -3058,6 +3109,11 @@ class $$CoiffeursTableFilterComposer
 
   ColumnFilters<String> get adresse => $composableBuilder(
     column: $table.adresse,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get telephone => $composableBuilder(
+    column: $table.telephone,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3170,6 +3226,11 @@ class $$CoiffeursTableOrderingComposer
     column: $table.adresse,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get telephone => $composableBuilder(
+    column: $table.telephone,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CoiffeursTableAnnotationComposer
@@ -3218,6 +3279,9 @@ class $$CoiffeursTableAnnotationComposer
 
   GeneratedColumn<String> get adresse =>
       $composableBuilder(column: $table.adresse, builder: (column) => column);
+
+  GeneratedColumn<String> get telephone =>
+      $composableBuilder(column: $table.telephone, builder: (column) => column);
 
   Expression<T> visitesRefs<T extends Object>(
     Expression<T> Function($$VisitesTableAnnotationComposer a) f,
@@ -3308,6 +3372,7 @@ class $$CoiffeursTableTableManager
                 Value<String?> lieuNaissance = const Value.absent(),
                 Value<DateTime?> dateNaissance = const Value.absent(),
                 Value<String?> adresse = const Value.absent(),
+                Value<String?> telephone = const Value.absent(),
               }) => CoiffeursCompanion(
                 id: id,
                 nom: nom,
@@ -3319,6 +3384,7 @@ class $$CoiffeursTableTableManager
                 lieuNaissance: lieuNaissance,
                 dateNaissance: dateNaissance,
                 adresse: adresse,
+                telephone: telephone,
               ),
           createCompanionCallback:
               ({
@@ -3332,6 +3398,7 @@ class $$CoiffeursTableTableManager
                 Value<String?> lieuNaissance = const Value.absent(),
                 Value<DateTime?> dateNaissance = const Value.absent(),
                 Value<String?> adresse = const Value.absent(),
+                Value<String?> telephone = const Value.absent(),
               }) => CoiffeursCompanion.insert(
                 id: id,
                 nom: nom,
@@ -3343,6 +3410,7 @@ class $$CoiffeursTableTableManager
                 lieuNaissance: lieuNaissance,
                 dateNaissance: dateNaissance,
                 adresse: adresse,
+                telephone: telephone,
               ),
           withReferenceMapper: (p0) => p0
               .map(

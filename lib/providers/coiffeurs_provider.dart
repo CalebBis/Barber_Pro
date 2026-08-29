@@ -24,6 +24,7 @@ class CoiffeursNotifier extends AsyncNotifier<List<Coiffeur>> {
     String? lieuNaissance,
     DateTime? dateNaissance,
     String? adresse,
+    String? telephone,
   }) async {
     final db = ref.read(databaseProvider);
     final id = await db.into(db.coiffeurs).insert(CoiffeursCompanion.insert(
@@ -36,6 +37,7 @@ class CoiffeursNotifier extends AsyncNotifier<List<Coiffeur>> {
       lieuNaissance: Value(lieuNaissance),
       dateNaissance: Value(dateNaissance),
       adresse: Value(adresse),
+      telephone: Value(telephone),
     ));
     final newCoiffeur = await (db.select(db.coiffeurs)..where((t) => t.id.equals(id))).getSingle();
     SyncService.syncCoiffeur(newCoiffeur);
